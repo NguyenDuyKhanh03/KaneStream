@@ -21,13 +21,13 @@ public class CommentLike {
     @EmbeddedId
     private CommentLikeId id;
 
-    @MapsId("commentId")
-    @Column(name = "comment_id")
-    private UUID commentId;
-
-    @MapsId("userId")
-    @Column(name = "user_id")
-    private UUID user;
+//    @MapsId("commentId")
+//    @Column(name = "comment_id")
+//    private UUID commentId;
+//
+//    @MapsId("userId")
+//    @Column(name = "user_id")
+//    private UUID user;
 
     @Column(name = "created_at")
     @CreatedDate
