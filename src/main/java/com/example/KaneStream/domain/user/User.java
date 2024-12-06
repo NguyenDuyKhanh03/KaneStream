@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
@@ -62,9 +63,11 @@ public class User {
     private Timestamp updatedAt;
 
     @Enumerated(EnumType.STRING)
+    @ColumnTransformer(write = "?::users_role_enum")
     private Role role;
 
     @Enumerated(EnumType.STRING)
+    @ColumnTransformer(write = "?::users_status_enum")
     private UserStatus status;
 
 }

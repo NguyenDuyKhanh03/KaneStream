@@ -1,6 +1,7 @@
 package com.example.KaneStream.domain.user.service;
 
 import com.example.KaneStream.domain.user.*;
+import com.example.KaneStream.integration.minio.MinioChannel;
 import com.example.KaneStream.mapper.Mapper;
 import com.example.KaneStream.util.JWTService;
 import jakarta.transaction.Transactional;
@@ -10,7 +11,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.Objects;
 
 @Service
@@ -20,9 +24,12 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
 
+
     private final Mapper<User, UserDto> mapper;
 
     private final JWTService jwtService;
+
+    private final UserService userService;
 
     @Transactional
     public UserDto register(RegisterAccountRequest request) {
@@ -39,6 +46,9 @@ public class AuthenticationService {
         user.setLastName(request.getLastName());
         user.setPhone(request.getPhoneNumber());
         user.setStatus(UserStatus.active);
+        user.setSalt(generateSalt());
+
+        System.out.println("Status: "+user.getStatus());
         user.setRole(Role.user);
 
         System.out.println("Role: " + user.getRole());
@@ -55,4 +65,14 @@ public class AuthenticationService {
             throw new RuntimeException("Authentication failed");
         }
     }
+
+
+
+    private String generateSalt(){
+        SecureRandom random = new SecureRandom();
+        byte[] salt = new byte[16];
+        random.nextBytes(salt);
+        return Base64.getEncoder().encodeToString(salt);
+    }
+
 }
