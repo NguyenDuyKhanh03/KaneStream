@@ -26,6 +26,7 @@ public class User {
 
     private String avatar;
 
+    @Column(unique = true)
     private String username;
 
     @Column(name = "first_name")
@@ -40,8 +41,10 @@ public class User {
 
     private String bio;
 
+    @Column(unique = true)
     private String email;
 
+    @Column(unique = true)
     private String phone;
 
     @Column(name = "followers_count")

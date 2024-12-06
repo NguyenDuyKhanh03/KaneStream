@@ -1,24 +1,27 @@
 package com.example.KaneStream.integration.minio;
 
-import io.minio.BucketExistsArgs;
-import io.minio.MakeBucketArgs;
-import io.minio.MinioClient;
-import io.minio.SetBucketPolicyArgs;
+import io.minio.*;
+import io.minio.http.Method;
 import jakarta.annotation.PostConstruct;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Objects;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class MinioChannel {
     private final MinioClient minioClient;
+    private final String BUCKET= "kane-stream";
 
     @PostConstruct
     public void init() {
-        createBucket("kane-stream");
+        createBucket(BUCKET);
     }
 
     @SneakyThrows
@@ -68,4 +71,30 @@ public class MinioChannel {
 
 
     }
+
+    @SneakyThrows
+    public String upload(@NonNull final MultipartFile file) {
+        log.info("Bucket: {}, file size: {}",BUCKET, file.getSize());
+        try {
+            minioClient.putObject(
+                    PutObjectArgs.builder()
+                            .bucket(BUCKET)
+                            .object(file.getOriginalFilename())
+                            .contentType(Objects.isNull(file.getContentType()) ? "image/png; image/jpg;" : file.getContentType())
+                            .stream(file.getInputStream(), file.getSize(), -1)
+                            .build()
+            );
+        }catch (Exception e) {
+            log.error("Error uploading file: ", e);
+        }
+        return minioClient.getPresignedObjectUrl(
+                GetPresignedObjectUrlArgs.builder()
+                        .method(Method.GET)
+                        .bucket(BUCKET)
+                        .object(file.getOriginalFilename())
+                        .build()
+        );
+
+    }
+
 }
