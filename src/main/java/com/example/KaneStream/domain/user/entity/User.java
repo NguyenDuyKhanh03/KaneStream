@@ -1,5 +1,7 @@
-package com.example.KaneStream.domain.user;
+package com.example.KaneStream.domain.user.entity;
 
+import com.example.KaneStream.domain.user.Role;
+import com.example.KaneStream.domain.user.UserStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

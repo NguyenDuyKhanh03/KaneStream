@@ -1,6 +1,6 @@
-package com.example.KaneStream.domain.user;
+package com.example.KaneStream.domain.user.controller;
 
-import com.example.KaneStream.domain.user.constant.Constant;
+import com.example.KaneStream.constant.Constant;
 import com.example.KaneStream.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +23,7 @@ public class UserController {
         return ResponseEntity.ok().body(Constant.STATUS_SUCCESS);
     }
 
-    @PatchMapping("/upload-avatar")
+    @PatchMapping("/upload-cover")
     public ResponseEntity<String> uploadCover(@RequestParam MultipartFile file){
         userService.uploadCover(file);
         return ResponseEntity.ok().body(Constant.STATUS_SUCCESS);

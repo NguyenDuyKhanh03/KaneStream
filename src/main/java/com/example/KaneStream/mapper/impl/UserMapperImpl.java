@@ -1,6 +1,6 @@
 package com.example.KaneStream.mapper.impl;
 
-import com.example.KaneStream.domain.user.User;
+import com.example.KaneStream.domain.user.entity.User;
 import com.example.KaneStream.domain.user.UserDto;
 import com.example.KaneStream.mapper.Mapper;
 import lombok.RequiredArgsConstructor;

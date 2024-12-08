@@ -1,4 +1,4 @@
-package com.example.KaneStream.domain.user.constant;
+package com.example.KaneStream.constant;
 
 public class ExceptionMessage {
     public static final String BAD_REQUEST = "Bad request";

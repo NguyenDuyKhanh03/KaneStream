@@ -3,8 +3,8 @@ create type users_status_enum as enum('active', 'inactive', 'deleted','pending',
 
 create table if not exists users (
     id UUID primary key,
-    cover varchar(255),
-    avatar varchar(255),
+    cover text,
+    avatar text,
     username varchar(100) not null unique,
     first_name varchar(100) not null,
     last_name varchar(100) not null,
@@ -29,18 +29,16 @@ create table if not exists topics (
     updated_at timestamp not null,
     color varchar(10) not null
 );
-create type posts_type_enum as enum('text', 'image', 'video','link','event','poll','product','advertisement');
 
 create table if not exists posts (
     id UUID primary key,
     content text not null,
-    image varchar(255),
+    image text,
     author_id UUID not null,
     topic_id UUID not null,
     liked_count int default 0,
     comments_count int default 0,
     is_featured int default 0,
-    type posts_type_enum,
     created_at timestamp not null,
     updated_at timestamp not null,
     foreign key (author_id) references users(id),

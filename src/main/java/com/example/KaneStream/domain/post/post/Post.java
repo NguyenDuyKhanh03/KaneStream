@@ -1,12 +1,15 @@
 package com.example.KaneStream.domain.post.post;
 
 import com.example.KaneStream.domain.topic.Topic;
-import com.example.KaneStream.domain.user.User;
+import com.example.KaneStream.domain.user.entity.User;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnTransformer;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.sql.Timestamp;
 import java.util.UUID;
@@ -43,13 +46,13 @@ public class Post {
     @Column(name = "is_featured")
     private int isFeatured;
 
-    @Enumerated(EnumType.STRING)
-    private PostType type;
 
     @Column(name = "created_at")
+    @CreationTimestamp
     private Timestamp createdAt;
 
     @Column(name = "updated_at")
+    @CreationTimestamp
     private Timestamp updatedAt;
 
 

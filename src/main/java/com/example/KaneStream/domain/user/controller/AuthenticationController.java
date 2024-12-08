@@ -1,11 +1,12 @@
-package com.example.KaneStream.domain.user;
+package com.example.KaneStream.domain.user.controller;
 
-import com.example.KaneStream.domain.user.constant.Constant;
+import com.example.KaneStream.domain.user.LoginRequest;
+import com.example.KaneStream.domain.user.LoginResponse;
+import com.example.KaneStream.domain.user.RegisterAccountRequest;
+import com.example.KaneStream.domain.user.UserDto;
 import com.example.KaneStream.domain.user.service.AuthenticationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/auth")

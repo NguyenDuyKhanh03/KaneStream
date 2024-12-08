@@ -1,7 +1,7 @@
 package com.example.KaneStream.domain.user.service;
 
 
-import com.example.KaneStream.domain.user.User;
+import com.example.KaneStream.domain.user.entity.User;
 import com.example.KaneStream.domain.user.UserPrincipal;
 import com.example.KaneStream.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;

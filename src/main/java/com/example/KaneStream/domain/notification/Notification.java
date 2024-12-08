@@ -1,6 +1,6 @@
 package com.example.KaneStream.domain.notification;
 
-import com.example.KaneStream.domain.user.User;
+import com.example.KaneStream.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.example.KaneStream.domain.user.constant;
+package com.example.KaneStream.constant;
 
 public class Constant {
     public static final String AUTH_GUARD = "Authorization";

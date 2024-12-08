@@ -1,7 +1,7 @@
 package com.example.KaneStream.domain.comment;
 
 import com.example.KaneStream.domain.post.post.Post;
-import com.example.KaneStream.domain.user.User;
+import com.example.KaneStream.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,7 +1,7 @@
 package com.example.KaneStream.domain.user.service;
 
 import com.example.KaneStream.domain.user.*;
-import com.example.KaneStream.integration.minio.MinioChannel;
+import com.example.KaneStream.domain.user.entity.User;
 import com.example.KaneStream.mapper.Mapper;
 import com.example.KaneStream.util.JWTService;
 import jakarta.transaction.Transactional;
@@ -11,7 +11,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.security.SecureRandom;
 import java.util.Base64;
