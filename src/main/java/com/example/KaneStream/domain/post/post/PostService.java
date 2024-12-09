@@ -1,5 +1,8 @@
 package com.example.KaneStream.domain.post.post;
 
+import com.example.KaneStream.domain.post.post_like.PostLike;
+import com.example.KaneStream.domain.post.post_like.PostLikeId;
+import com.example.KaneStream.domain.post.post_like.PostLikeRepository;
 import com.example.KaneStream.domain.topic.Topic;
 import com.example.KaneStream.domain.topic.TopicService;
 import com.example.KaneStream.domain.user.entity.User;
@@ -14,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -23,6 +27,7 @@ public class PostService {
     private final UserService userService;
     private final TopicService topicService;
     private final MinioChannel minioChannel;
+    private final PostLikeRepository postLikeRepository;
 
     private final Mapper<Post,PostDto> postMapper;
 
@@ -91,7 +96,6 @@ public class PostService {
 
         int page = request.getPage() >= 0 ? request.getPage() : 0;
         int size = request.getSize() > 0 ? request.getSize() : 10;
-        String sortBy = request.getSortBy() != null ? request.getSortBy() : "created_at";
 
         Sort sort=Sort.by(request.getSortBy()).descending();
 
@@ -99,5 +103,28 @@ public class PostService {
 
         Page<Post> posts=postRepository.findAll(pageable);
         return posts.map(postMapper::mapFrom);
+    }
+
+    public int updateLikeCount(UUID postId) {
+        User user=userService.getCurrentUser()
+                .orElseThrow(()->new RuntimeException("User not logged in"));
+        Post post=postRepository.findById(postId)
+                .orElseThrow(()->new RuntimeException("Post not found"));
+
+        PostLike postLike= postLikeRepository.findById(new PostLikeId(postId,user.getId())).orElse(null);
+
+        if(Objects.isNull(postLike)){
+            post.setLikedCount(post.getLikedCount()+1);
+            postLike= new PostLike();
+            postLike.setId(new PostLikeId(postId,user.getId()));
+            postLikeRepository.save(postLike);
+        }
+        else{
+            post.setLikedCount(post.getLikedCount()-1);
+            postLikeRepository.delete(postLike);
+        }
+
+
+        return postRepository.save(post).getLikedCount();
     }
 }

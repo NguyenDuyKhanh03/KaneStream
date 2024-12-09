@@ -13,4 +13,5 @@ public class PostDto {
     private UUID id;
     private String content;
     private String image;
+    private int likedCount;
 }
