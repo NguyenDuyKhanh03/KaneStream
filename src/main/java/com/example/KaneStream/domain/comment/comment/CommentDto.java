@@ -1,4 +1,4 @@
-package com.example.KaneStream.domain.post.post;
+package com.example.KaneStream.domain.comment.comment;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,10 +9,10 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostDto {
+public class CommentDto {
     private UUID id;
     private String content;
-    private String image;
     private int likedCount;
-    private int commentsCount;
+    private UUID userId;
+    private UUID postId;
 }

@@ -10,12 +10,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/post")
 @RequiredArgsConstructor
+@CrossOrigin(originPatterns = "*")
 public class PostController {
     private final PostService postService;
 
@@ -39,20 +41,10 @@ public class PostController {
     }
 
     @GetMapping("/get-list-post")
-    public ResponseEntity<Page<PostDto>> getPostList(GetPostRequest request) {
-        Page<PostDto> posts=postService.getPosts(request);
+    public ResponseEntity<List<PostResponse>> getPostList(@RequestParam(defaultValue = "0") int page) {
+        List<PostResponse> posts=postService.getPosts(page);
         return ResponseEntity.status(HttpStatus.OK).body(posts);
 
     }
 
-    @GetMapping("/get-total-page")
-    public ResponseEntity<Map<String, Object>> getPostTotalPage(GetPostRequest request) {
-        Page<PostDto> posts=postService.getPosts(request);
-        Map<String, Object> response = new HashMap<>();
-        response.put("currentPage", posts.getNumber());
-        response.put("totalPages", posts.getTotalPages());
-        response.put("totalElements", posts.getTotalElements());
-        response.put("size", posts.getSize());
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
 }

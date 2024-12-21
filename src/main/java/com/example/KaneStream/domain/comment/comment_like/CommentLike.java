@@ -1,4 +1,4 @@
-package com.example.KaneStream.domain.comment;
+package com.example.KaneStream.domain.comment.comment_like;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -8,7 +8,6 @@ import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.sql.Timestamp;
-import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor

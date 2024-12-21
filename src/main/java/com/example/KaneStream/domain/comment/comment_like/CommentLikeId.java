@@ -1,4 +1,4 @@
-package com.example.KaneStream.domain.comment;
+package com.example.KaneStream.domain.comment.comment_like;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

@@ -11,5 +11,5 @@ import java.util.UUID;
 @AllArgsConstructor
 public class PostLikeResponse {
     UUID postId;
-    private int likeCount;
+    int likedCount;
 }

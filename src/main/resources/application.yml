@@ -35,6 +35,10 @@ integration:
 jwt:
   secret_key: ${SECRET_KEY:}
 
+#logging:
+#  level:
+#    web: debug
+
 
 
 

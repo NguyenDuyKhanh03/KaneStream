@@ -5,6 +5,7 @@ import com.example.KaneStream.domain.post.post_like.PostLikeId;
 import com.example.KaneStream.domain.post.post_like.PostLikeRepository;
 import com.example.KaneStream.domain.topic.Topic;
 import com.example.KaneStream.domain.topic.TopicService;
+import com.example.KaneStream.domain.user.UserDto;
 import com.example.KaneStream.domain.user.entity.User;
 import com.example.KaneStream.domain.user.service.UserService;
 import com.example.KaneStream.integration.minio.MinioChannel;
@@ -16,9 +17,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -92,22 +94,35 @@ public class PostService {
         }
     }
 
-    public Page<PostDto> getPosts(GetPostRequest request) {
+    public List<PostResponse> getPosts(int page) {
 
-        int page = request.getPage() >= 0 ? request.getPage() : 0;
-        int size = request.getSize() > 0 ? request.getSize() : 10;
 
-        Sort sort=Sort.by(request.getSortBy()).descending();
+        Sort sort=Sort.by("likedCount","commentsCount").descending();
 
-        Pageable pageable= PageRequest.of(page,size,sort);
+        Pageable pageable= PageRequest.of(page,10,sort);
 
-        Page<Post> posts=postRepository.findAll(pageable);
-        return posts.map(postMapper::mapFrom);
+        List<Post> posts=postRepository.findAll(pageable).getContent();
+        List<PostResponse> list=new ArrayList<>();
+        for(Post post:posts){
+            User user=post.getAuthor();
+            PostDto postDto=postMapper.mapFrom(post);
+            PostResponse postResponse=new PostResponse(
+                    new UserDto(user.getId(),user.getAvatar(),
+                            user.getUsername()),
+                    postDto
+            );
+            list.add(postResponse);
+        }
+        return list;
     }
 
-    public int updateLikeCount(UUID postId) {
-        User user=userService.getCurrentUser()
-                .orElseThrow(()->new RuntimeException("User not logged in"));
+    public int updateLikeCount(UUID postId, String username) {
+        User user=userService.getUserByUsername(username)
+                        .orElseThrow(
+                                ()->new RuntimeException("User not logged in")
+                        );
+
+        System.out.println(user.getUsername());
         Post post=postRepository.findById(postId)
                 .orElseThrow(()->new RuntimeException("Post not found"));
 
@@ -127,4 +142,10 @@ public class PostService {
 
         return postRepository.save(post).getLikedCount();
     }
+
+    public Optional<Post> getPostById(UUID postId) {
+        return postRepository.findById(postId);
+    }
+
+
 }

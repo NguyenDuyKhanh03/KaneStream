@@ -1,5 +1,6 @@
-package com.example.KaneStream.domain.comment;
+package com.example.KaneStream.domain.comment.comment;
 
+import com.example.KaneStream.domain.comment.CommentStatus;
 import com.example.KaneStream.domain.post.post.Post;
 import com.example.KaneStream.domain.user.entity.User;
 import jakarta.persistence.*;
@@ -7,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnTransformer;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.sql.Timestamp;
@@ -45,6 +47,7 @@ public class Comment {
     private int replyCount;
 
     @Enumerated(EnumType.STRING)
+    @ColumnTransformer(write = "?::comments_type_enum")
     private CommentStatus status;
 
     @Column(name="created_at")
