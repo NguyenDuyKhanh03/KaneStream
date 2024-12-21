@@ -2,6 +2,7 @@ package com.example.KaneStream.domain.user.service;
 
 import com.example.KaneStream.domain.user.entity.User;
 import com.example.KaneStream.domain.user.UserRepository;
+import com.example.KaneStream.exeption.ResourceNotFoundException;
 import com.example.KaneStream.integration.minio.MinioChannel;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -30,7 +31,7 @@ public class UserService {
 
     public void uploadAvatar(MultipartFile file) {
         User user= getCurrentUser()
-                .orElseThrow(() -> new RuntimeException("User Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
 
         user.setAvatar(minioChannel.upload(file));
         userRepository.save(user);
@@ -39,7 +40,7 @@ public class UserService {
 
     public void uploadCover(MultipartFile file) {
         User user= getCurrentUser()
-                .orElseThrow(() -> new RuntimeException("User Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
 
         user.setAvatar(minioChannel.upload(file));
         userRepository.save(user);

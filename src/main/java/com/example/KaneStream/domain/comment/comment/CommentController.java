@@ -29,10 +29,17 @@ public class CommentController {
     }
 
     @MessageMapping("/comment/post/{postId}")
-    @SendTo("/topic/comment")
+    @SendTo("/topic/comment/post/{postId}")
     public CommentDto postComment(@DestinationVariable UUID postId, @Payload String content) {
         return commentService.postComment(postId,content);
     }
+
+    @MessageMapping("/comment/post/{commentId}")
+    @SendTo("/topic/comment/post/{postId}")
+    public CommentDto postCommentReply(@DestinationVariable UUID postId,@DestinationVariable UUID commentId, @Payload String content) {
+        return commentService.postCommentReply(commentId,content);
+    }
+
 
     @MessageMapping("/comment/delete/{postId}")
     @SendTo("/topic/comment")

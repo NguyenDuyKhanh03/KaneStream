@@ -2,6 +2,8 @@ package com.example.KaneStream.domain.user.service;
 
 import com.example.KaneStream.domain.user.*;
 import com.example.KaneStream.domain.user.entity.User;
+import com.example.KaneStream.exeption.ResourceAlreadyExistsException;
+import com.example.KaneStream.exeption.ResourceNotFoundException;
 import com.example.KaneStream.mapper.Mapper;
 import com.example.KaneStream.util.JWTService;
 import jakarta.transaction.Transactional;
@@ -35,7 +37,7 @@ public class AuthenticationService {
         User user = userRepository.findByEmail(request.getEmail());
 
         if(!Objects.isNull(user)) {
-            throw new RuntimeException("User already exists");
+            throw new ResourceAlreadyExistsException("User already exists");
         }
         user=new User();
         user.setUsername(request.getUsername());
@@ -61,7 +63,7 @@ public class AuthenticationService {
             return new LoginResponse(jwtService.generateToken(request.getUsername()));
         }
         else{
-            throw new RuntimeException("Authentication failed");
+            throw new ResourceNotFoundException("Authentication failed");
         }
     }
 

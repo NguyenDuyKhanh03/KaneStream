@@ -10,7 +10,11 @@ import com.example.KaneStream.domain.post.post.Post;
 import com.example.KaneStream.domain.post.post.PostService;
 import com.example.KaneStream.domain.user.entity.User;
 import com.example.KaneStream.domain.user.service.UserService;
+import com.example.KaneStream.exeption.CustomAccessDeniedException;
+import com.example.KaneStream.exeption.ResourceNotFoundException;
+import com.example.KaneStream.exeption.UserNotAuthenticatedException;
 import com.example.KaneStream.mapper.Mapper;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -33,20 +37,21 @@ public class CommentService {
     public Page<CommentDto> getComments(int page) {
 
 
-        Sort sort=Sort.by("liked_count").descending();
+        Sort sort=Sort.by("likedCount").descending();
 
         Pageable pageable = PageRequest.of(page, 10, sort);
         Page<Comment> comments= commentRepository.findAll(pageable);
         return comments.map(mapper::mapFrom);
     }
 
+    @Transactional
     public CommentDto postComment(UUID postId, String content) {
         User user= userService.getCurrentUser()
-                .orElseThrow(()-> new RuntimeException("User not logged in"));
+                .orElseThrow(()-> new UserNotAuthenticatedException("User not logged in"));
 
         Post post= postService.getPostById(postId)
                 .orElseThrow(
-                        ()-> new RuntimeException("Post not found")
+                        ()-> new ResourceNotFoundException("Post not found")
                 );
 
         Comment comment= new Comment();
@@ -54,32 +59,37 @@ public class CommentService {
         comment.setUser(user);
         comment.setPost(post);
         comment.setStatus(CommentStatus.active);
+
+        postService.updateCommentCount(postId);
+
         return mapper.mapFrom(commentRepository.save(comment));
     }
 
+    @Transactional
     public String deleteComment(UUID postId) {
         User user= userService.getCurrentUser()
-                .orElseThrow(()-> new RuntimeException("User not logged in"));
+                .orElseThrow(()-> new UserNotAuthenticatedException("User not logged in"));
 
         Post post= postService.getPostById(postId)
                 .orElseThrow(
-                        ()-> new RuntimeException("Post not found")
+                        ()-> new ResourceNotFoundException("Post not found")
                 );
 
         if(post.getAuthor().equals(user)) {
             commentRepository.deleteById(postId);
             return "Comment deleted";
         }
-        throw new RuntimeException("This comment cannot be deleted");
+        throw new CustomAccessDeniedException("This comment cannot be deleted");
     }
 
+    @Transactional
     public CommentDto updateCommentLike(UUID commentId) {
         User user= userService.getCurrentUser()
-                .orElseThrow(()-> new RuntimeException("User not logged in"));
+                .orElseThrow(()-> new UserNotAuthenticatedException("User not logged in"));
 
         Comment comment=commentRepository.findById(commentId)
                 .orElseThrow(
-                        ()-> new RuntimeException("Comment not found")
+                        ()-> new ResourceNotFoundException("Comment not found")
                 );
 
         CommentLike commentLike= commentLikeRepository.findById(new CommentLikeId(commentId,user.getId())).orElse(null);
@@ -97,5 +107,31 @@ public class CommentService {
 
 
         return mapper.mapFrom(commentRepository.save(comment));
+    }
+
+    @Transactional
+    public CommentDto postCommentReply(UUID commentId, String content) {
+        Comment comment=commentRepository.findById(commentId)
+                .orElseThrow(
+                        ()-> new ResourceNotFoundException("Comment not found")
+                );
+
+        Post post= comment.getPost();
+        if(Objects.isNull(post)) {
+            throw new ResourceNotFoundException("Post not found");
+        }
+
+        Comment commentReply= new Comment();
+        commentReply.setContent(content);
+        commentReply.setUser(comment.getUser());
+        commentReply.setPost(post);
+        commentReply.setStatus(CommentStatus.active);
+
+        postService.updateCommentCount(post.getId());
+
+        return mapper.mapFrom(commentRepository.save(commentReply));
+
+
+
     }
 }

@@ -8,6 +8,9 @@ import com.example.KaneStream.domain.topic.TopicService;
 import com.example.KaneStream.domain.user.UserDto;
 import com.example.KaneStream.domain.user.entity.User;
 import com.example.KaneStream.domain.user.service.UserService;
+import com.example.KaneStream.exeption.CustomAccessDeniedException;
+import com.example.KaneStream.exeption.ResourceNotFoundException;
+import com.example.KaneStream.exeption.UserNotAuthenticatedException;
 import com.example.KaneStream.integration.minio.MinioChannel;
 import com.example.KaneStream.mapper.Mapper;
 import jakarta.transaction.Transactional;
@@ -36,7 +39,7 @@ public class PostService {
     @Transactional
     public PostDto createPost(PostRequest request) {
         User user=userService.getCurrentUser()
-                .orElseThrow(()->new RuntimeException("User not logged in"));
+                .orElseThrow(()->new ResourceNotFoundException("User not logged in."));
 
         Post post=new Post();
         post.setAuthor(user);
@@ -59,26 +62,27 @@ public class PostService {
     @Transactional
     public void deletePost(UUID postId) {
         User user=userService.getCurrentUser()
-                .orElseThrow(()->new RuntimeException("User not logged in"));
+                .orElseThrow(()->new UserNotAuthenticatedException("User not logged in."));
 
         Post post=postRepository.findById(postId)
-                .orElseThrow(()->new RuntimeException("Post not found"));
+                .orElseThrow(()->new ResourceNotFoundException("Post not found"));
 
         if(post.getAuthor()==user){
             postRepository.delete(post);
         }
         else{
-            throw new RuntimeException("You are not allowed to delete this post");
+            throw new CustomAccessDeniedException("You are not allowed to delete this post");
         }
 
     }
 
+    @Transactional
     public PostDto updatePost(UUID postId, PostRequest request) {
         User user=userService.getCurrentUser()
-                .orElseThrow(()->new RuntimeException("User not logged in"));
+                .orElseThrow(()->new UserNotAuthenticatedException("User not logged in"));
 
         Post post=postRepository.findById(postId)
-                .orElseThrow(()->new RuntimeException("Post not found"));
+                .orElseThrow(()->new ResourceNotFoundException("Post not found"));
 
         if(post.getAuthor()==user){
             if(request.getContent()!=null){
@@ -90,7 +94,7 @@ public class PostService {
             return postMapper.mapFrom(postRepository.save(post));
         }
         else{
-            throw new RuntimeException("You are not allowed to delete this post");
+            throw new CustomAccessDeniedException("You are not allowed to delete this post");
         }
     }
 
@@ -116,15 +120,16 @@ public class PostService {
         return list;
     }
 
+    @Transactional
     public int updateLikeCount(UUID postId, String username) {
         User user=userService.getUserByUsername(username)
                         .orElseThrow(
-                                ()->new RuntimeException("User not logged in")
+                                ()->new UserNotAuthenticatedException("User not logged in")
                         );
 
         System.out.println(user.getUsername());
         Post post=postRepository.findById(postId)
-                .orElseThrow(()->new RuntimeException("Post not found"));
+                .orElseThrow(()->new ResourceNotFoundException("Post not found"));
 
         PostLike postLike= postLikeRepository.findById(new PostLikeId(postId,user.getId())).orElse(null);
 
@@ -145,6 +150,19 @@ public class PostService {
 
     public Optional<Post> getPostById(UUID postId) {
         return postRepository.findById(postId);
+    }
+
+    @Transactional
+    public void updateCommentCount(UUID postId) {
+        Post post= postRepository.findById(postId).orElseThrow(
+                ()->new ResourceNotFoundException("Post not found")
+        );
+
+        post.setCommentsCount(post.getCommentsCount()+1);
+        postRepository.save(post);
+
+
+
     }
 
 
