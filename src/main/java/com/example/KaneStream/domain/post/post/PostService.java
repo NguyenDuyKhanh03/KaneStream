@@ -56,6 +56,9 @@ public class PostService {
         topic.setPostsCount(count+1);
         topicService.updateTopic(topic);
 
+        user.setPostsCount(user.getPostsCount()+1);
+        userService.updateUser(user);
+
         return postMapper.mapFrom(postRepository.save(post));
     }
 
@@ -69,6 +72,9 @@ public class PostService {
 
         if(post.getAuthor()==user){
             postRepository.delete(post);
+
+            user.setPostsCount(user.getPostsCount()-1);
+            userService.updateUser(user);
         }
         else{
             throw new CustomAccessDeniedException("You are not allowed to delete this post");
