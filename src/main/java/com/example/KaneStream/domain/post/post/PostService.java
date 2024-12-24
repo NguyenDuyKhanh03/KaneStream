@@ -104,26 +104,26 @@ public class PostService {
         }
     }
 
-    public List<PostResponse> getPosts(int page) {
+    public Page<PostResponse> getPosts(int page) {
 
 
         Sort sort=Sort.by("likedCount","commentsCount").descending();
 
         Pageable pageable= PageRequest.of(page,10,sort);
 
-        List<Post> posts=postRepository.findAll(pageable).getContent();
-        List<PostResponse> list=new ArrayList<>();
-        for(Post post:posts){
+        Page<Post> posts=postRepository.findAll(pageable);
+        return posts.map(post -> {
             User user=post.getAuthor();
             PostDto postDto=postMapper.mapFrom(post);
-            PostResponse postResponse=new PostResponse(
+            return new PostResponse(
                     new UserDto(user.getId(),user.getAvatar(),
                             user.getUsername()),
                     postDto
             );
-            list.add(postResponse);
-        }
-        return list;
+
+        });
+
+
     }
 
     @Transactional

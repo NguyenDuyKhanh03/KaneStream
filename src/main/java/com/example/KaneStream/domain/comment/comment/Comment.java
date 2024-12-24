@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnTransformer;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.sql.Timestamp;
@@ -51,11 +52,11 @@ public class Comment {
     private CommentStatus status;
 
     @Column(name="created_at")
-    @CreatedDate
+    @CreationTimestamp
     private Timestamp createdAt;
 
     @Column(name="updated_at")
-    @CreatedDate
+    @CreationTimestamp
     private Timestamp updatedAt;
 
 }

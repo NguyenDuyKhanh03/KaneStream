@@ -21,7 +21,6 @@ public class PostLikeController {
     @SendTo("/topic/posts")
     public PostLikeResponse handleLikePost(@DestinationVariable UUID postId, Principal principal) {
         String username = principal.getName();
-        System.out.println(username);
         int likedCount= postService.updateLikeCount(postId,username);
         return new PostLikeResponse(postId, likedCount);
     }

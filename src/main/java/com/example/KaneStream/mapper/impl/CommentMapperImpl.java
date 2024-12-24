@@ -13,7 +13,12 @@ public class CommentMapperImpl implements Mapper<Comment, CommentDto> {
     private final ModelMapper modelMapper;
     @Override
     public CommentDto mapFrom(Comment comment) {
-        return modelMapper.map(comment, CommentDto.class);
+        CommentDto commentDto = modelMapper.map(comment, CommentDto.class);
+        commentDto.setUsername(comment.getUser().getUsername());
+        commentDto.setAvatar(comment.getUser().getAvatar());
+        commentDto.setPostId(comment.getPost().getId());
+        commentDto.setUserId(comment.getUser().getId());
+        return commentDto;
     }
 
     @Override

@@ -41,9 +41,8 @@ public class PostController {
     }
 
     @GetMapping("/get-list-post")
-    public ResponseEntity<List<PostResponse>> getPostList(@RequestParam(defaultValue = "0") int page) {
-        List<PostResponse> posts=postService.getPosts(page);
-        return ResponseEntity.status(HttpStatus.OK).body(posts);
+    public ResponseEntity<Page<PostResponse>> getPostList(@RequestParam(defaultValue = "0") int page) {
+        return ResponseEntity.status(HttpStatus.OK).body(postService.getPosts(page));
 
     }
 

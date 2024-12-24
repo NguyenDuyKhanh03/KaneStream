@@ -16,10 +16,7 @@ import com.example.KaneStream.exeption.UserNotAuthenticatedException;
 import com.example.KaneStream.mapper.Mapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -34,21 +31,33 @@ public class CommentService {
     private final UserService userService;
     private final PostService postService;
 
-    public Page<CommentDto> getComments(int page) {
+    public Page<CommentDto> getComments(int page,UUID postId) {
 
 
         Sort sort=Sort.by("likedCount").descending();
+        Post post= postService.getPostById(postId)
+                .orElseThrow(
+                        ()-> new ResourceNotFoundException("Post not found")
+                );
 
         Pageable pageable = PageRequest.of(page, 10, sort);
-        Page<Comment> comments= commentRepository.findAll(pageable);
-        return comments.map(mapper::mapFrom);
+        Page<Comment> comments= commentRepository.findByPost(post, pageable);
+
+        return comments.map(comment -> {
+            CommentDto commentDto=mapper.mapFrom(comment);
+            commentDto.setAvatar(comment.getUser().getAvatar());
+            commentDto.setUsername(comment.getUser().getUsername());
+            return commentDto;
+        });
+
     }
 
     @Transactional
-    public CommentDto postComment(UUID postId, String content) {
-        User user= userService.getCurrentUser()
-                .orElseThrow(()-> new UserNotAuthenticatedException("User not logged in"));
-
+    public CommentDto postComment(UUID postId, String content, String username) {
+        User user=userService.getUserByUsername(username)
+                .orElseThrow(
+                        ()->new UserNotAuthenticatedException("User not logged in")
+                );
         Post post= postService.getPostById(postId)
                 .orElseThrow(
                         ()-> new ResourceNotFoundException("Post not found")

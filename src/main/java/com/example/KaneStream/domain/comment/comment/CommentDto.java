@@ -10,6 +10,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CommentDto {
+    private String avatar;
+    private String username;
     private UUID id;
     private String content;
     private int likedCount;

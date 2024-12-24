@@ -8,34 +8,34 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.UUID;
 
 
 @RestController
 @RequestMapping("/comment")
 @RequiredArgsConstructor
+@CrossOrigin(originPatterns = "*")
 public class CommentController {
     private final CommentService commentService;
 
-    @GetMapping("/gets/page")
-    public ResponseEntity<Page<CommentDto>> getComments(@RequestParam(defaultValue = "0") int page) {
-        Page<CommentDto> comments=commentService.getComments(page);
+    @GetMapping("/gets/comments")
+    public ResponseEntity<Page<CommentDto>> getComments(@RequestParam(defaultValue = "0") int page,@RequestParam UUID postId) {
+        Page<CommentDto> comments=commentService.getComments(page,postId);
         return ResponseEntity.ok(comments);
     }
 
     @MessageMapping("/comment/post/{postId}")
     @SendTo("/topic/comment/post/{postId}")
-    public CommentDto postComment(@DestinationVariable UUID postId, @Payload String content) {
-        return commentService.postComment(postId,content);
+    public CommentDto postComment(@DestinationVariable UUID postId, @Payload String content, Principal principal) {
+        String username=principal.getName();
+        return commentService.postComment(postId,content,username);
     }
 
-    @MessageMapping("/comment/post/{commentId}")
-    @SendTo("/topic/comment/post/{postId}")
+    @MessageMapping("/comment/post/reply/{commentId}")
+    @SendTo("/topic/comment/post/reply/{postId}")
     public CommentDto postCommentReply(@DestinationVariable UUID postId,@DestinationVariable UUID commentId, @Payload String content) {
         return commentService.postCommentReply(commentId,content);
     }
