@@ -3,6 +3,7 @@ package com.example.KaneStream.domain.post.post;
 import com.example.KaneStream.domain.user.UserDto;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter

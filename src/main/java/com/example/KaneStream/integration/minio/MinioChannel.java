@@ -87,11 +87,13 @@ public class MinioChannel {
         }catch (Exception e) {
             log.error("Error uploading file: ", e);
         }
+        int expiryInSeconds = 3600;
         return minioClient.getPresignedObjectUrl(
                 GetPresignedObjectUrlArgs.builder()
                         .method(Method.GET)
                         .bucket(BUCKET)
                         .object(file.getOriginalFilename())
+                        .expiry(expiryInSeconds)
                         .build()
         );
 

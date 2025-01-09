@@ -23,8 +23,8 @@ public class PostController {
 
     @PreAuthorize("hasAuthority('user') or hasAuthority('admin')")
     @PostMapping(value = "/create",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<PostDto> createPost(PostRequest request) {
-        PostDto post=postService.createPost(request);
+    public ResponseEntity<PostResponse> createPost(PostRequest request) {
+        PostResponse post=postService.createPost(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(post);
     }
 

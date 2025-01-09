@@ -37,7 +37,7 @@ public class PostService {
     private final Mapper<Post,PostDto> postMapper;
 
     @Transactional
-    public PostDto createPost(PostRequest request) {
+    public PostResponse createPost(PostRequest request) {
         User user=userService.getCurrentUser()
                 .orElseThrow(()->new ResourceNotFoundException("User not logged in."));
 
@@ -59,7 +59,11 @@ public class PostService {
         user.setPostsCount(user.getPostsCount()+1);
         userService.updateUser(user);
 
-        return postMapper.mapFrom(postRepository.save(post));
+
+        return PostResponse.builder()
+                .user(new UserDto(user.getId(),user.getAvatar(),user.getUsername()))
+                .post(postMapper.mapFrom(postRepository.save(post)))
+                .build();
     }
 
     @Transactional
