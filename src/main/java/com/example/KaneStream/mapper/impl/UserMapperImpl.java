@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class UserMapperImpl implements Mapper<User, UserDto> {
     private final ModelMapper modelMapper;
+
     @Override
     public UserDto mapFrom(User user) {
         return modelMapper.map(user, UserDto.class);

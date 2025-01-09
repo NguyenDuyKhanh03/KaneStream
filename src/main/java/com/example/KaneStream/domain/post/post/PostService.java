@@ -61,7 +61,7 @@ public class PostService {
 
 
         return PostResponse.builder()
-                .user(new UserDto(user.getId(),user.getAvatar(),user.getUsername()))
+                .user(UserDto.builder().id(user.getId()).avatar(user.getAvatar()).username(user.getUsername()).build())
                 .post(postMapper.mapFrom(postRepository.save(post)))
                 .build();
     }
@@ -120,8 +120,7 @@ public class PostService {
             User user=post.getAuthor();
             PostDto postDto=postMapper.mapFrom(post);
             return new PostResponse(
-                    new UserDto(user.getId(),user.getAvatar(),
-                            user.getUsername()),
+                    UserDto.builder().id(user.getId()).avatar(user.getAvatar()).username(user.getUsername()).build(),
                     postDto
             );
 

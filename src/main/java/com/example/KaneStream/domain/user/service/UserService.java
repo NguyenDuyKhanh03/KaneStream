@@ -1,5 +1,6 @@
 package com.example.KaneStream.domain.user.service;
 
+import com.example.KaneStream.domain.user.UserDto;
 import com.example.KaneStream.domain.user.entity.User;
 import com.example.KaneStream.domain.user.UserRepository;
 import com.example.KaneStream.exeption.ResourceNotFoundException;
@@ -57,5 +58,18 @@ public class UserService {
 
     public void updateUser(User user) {
         userRepository.save(user);
+    }
+
+    public UserDto getUser(){
+        User user= getCurrentUser().orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
+        return UserDto.builder()
+                .id(user.getId())
+                .name(user.getLastName())
+                .username(user.getUsername())
+                .avatar(user.getAvatar())
+                .bio(user.getBio())
+                .posts(user.getPostsCount())
+                .followers(user.getFollowersCount())
+                .build();
     }
 }
