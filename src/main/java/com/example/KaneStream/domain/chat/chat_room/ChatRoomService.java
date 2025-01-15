@@ -78,4 +78,9 @@ public class ChatRoomService {
 
     }
 
+    public ChatRoom getChatRoom(UUID roomId) {
+        return chatRoomRepository.findById(roomId)
+                .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
+    }
+
 }
