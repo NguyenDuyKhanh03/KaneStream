@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,11 @@ public class PostController {
     public ResponseEntity<Page<PostResponse>> getPostList(@RequestParam(defaultValue = "0") int page) {
         return ResponseEntity.status(HttpStatus.OK).body(postService.getPosts(page));
 
+    }
+
+    @PostMapping("/add-data-to-es")
+    public void addDataToEs() throws IOException {
+        postService.addPost();
     }
 
 }

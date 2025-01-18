@@ -1,5 +1,13 @@
 package com.example.KaneStream.domain.post.post;
 
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.mapping.IntegerNumberProperty;
+import co.elastic.clients.elasticsearch._types.mapping.Property;
+import co.elastic.clients.elasticsearch._types.mapping.TextProperty;
+import co.elastic.clients.elasticsearch.core.IndexRequest;
+import co.elastic.clients.elasticsearch.core.IndexResponse;
+import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
+import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
 import com.example.KaneStream.domain.post.post_like.PostLike;
 import com.example.KaneStream.domain.post.post_like.PostLikeId;
 import com.example.KaneStream.domain.post.post_like.PostLikeRepository;
@@ -22,6 +30,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,6 +44,9 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
 
     private final Mapper<Post,PostDto> postMapper;
+
+    private final ElasticsearchClient client;
+
 
     @Transactional
     public PostResponse createPost(PostRequest request) {
@@ -170,6 +182,56 @@ public class PostService {
         post.setCommentsCount(post.getCommentsCount()+1);
         postRepository.save(post);
 
+
+
+    }
+
+
+
+    private void createIndexIfNotExists(String indexName) throws IOException {
+        boolean indexExists = client.indices().exists(e -> e.index(indexName)).value();
+        if (!indexExists) {
+            // Nếu không tồn tại, tạo chỉ mục
+            CreateIndexRequest createIndexRequest = new CreateIndexRequest.Builder()
+                    .index(indexName)
+                    .mappings(m -> m.properties("id", Property.of(p -> p.text(TextProperty.of(t -> t))))
+                            .properties("content", Property.of(p -> p.text(TextProperty.of(t -> t))))
+                            .properties("image", Property.of(p -> p.text(TextProperty.of(t -> t))))
+                            .properties("authorId", Property.of(p -> p.text(TextProperty.of(t -> t))))
+                            .properties("topicId", Property.of(p -> p.text(TextProperty.of(t -> t)))))
+                    .build();
+
+            CreateIndexResponse createIndexResponse = client.indices().create(createIndexRequest);
+            System.out.println("Index created: " + createIndexResponse.index());
+        }
+    }
+
+    public void addPost() throws IOException {
+        createIndexIfNotExists("post");
+        List<Post> posts=postRepository.findAll();
+        List<PostES> postES=new ArrayList<>();
+        for (Post post1 : posts) {
+            PostES postES1=new PostES();
+            postES1.setId(post1.getId().toString());
+            postES1.setContent(post1.getContent());
+            postES1.setImage(post1.getImage());
+            postES1.setAuthorId(post1.getAuthor().getId().toString());
+            postES1.setTopicId(post1.getTopic().getId().toString());
+
+            postES.add(postES1);
+        }
+
+
+        for (PostES postES1 : postES) {
+            // Tạo IndexRequest từ đối tượng PostES
+            IndexRequest<PostES> indexRequest = IndexRequest.of(i -> i
+                    .index("posts")  // Chỉ mục "posts"
+                    .id(postES1.getId())  // Đặt ID cho document (nếu cần)
+                    .document(postES1)  // Đặt đối tượng PostES vào trong document
+            );
+            // Gửi yêu cầu index đến Elasticsearch
+            IndexResponse response = client.index(indexRequest);
+        }
 
 
     }
