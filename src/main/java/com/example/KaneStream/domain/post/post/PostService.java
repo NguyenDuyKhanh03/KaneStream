@@ -1,11 +1,7 @@
 package com.example.KaneStream.domain.post.post;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch._types.mapping.IntegerNumberProperty;
-import co.elastic.clients.elasticsearch._types.mapping.Property;
-import co.elastic.clients.elasticsearch._types.mapping.TextProperty;
 import co.elastic.clients.elasticsearch.core.IndexRequest;
-import co.elastic.clients.elasticsearch.core.IndexResponse;
 import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
 import com.example.KaneStream.domain.post.post_like.PostLike;
@@ -28,7 +24,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
 import java.util.*;
@@ -71,11 +66,14 @@ public class PostService {
         user.setPostsCount(user.getPostsCount()+1);
         userService.updateUser(user);
 
-
-        return PostResponse.builder()
+        PostResponse postResponse=PostResponse.builder()
                 .user(UserDto.builder().id(user.getId()).avatar(user.getAvatar()).username(user.getUsername()).build())
                 .post(postMapper.mapFrom(postRepository.save(post)))
                 .build();
+
+        addPost(postResponse);
+
+        return postResponse;
     }
 
     @Transactional
@@ -188,50 +186,38 @@ public class PostService {
 
 
 
-    private void createIndexIfNotExists(String indexName) throws IOException {
-        boolean indexExists = client.indices().exists(e -> e.index(indexName)).value();
-        if (!indexExists) {
-            // Nếu không tồn tại, tạo chỉ mục
-            CreateIndexRequest createIndexRequest = new CreateIndexRequest.Builder()
-                    .index(indexName)
-                    .mappings(m -> m.properties("id", Property.of(p -> p.text(TextProperty.of(t -> t))))
-                            .properties("content", Property.of(p -> p.text(TextProperty.of(t -> t))))
-                            .properties("image", Property.of(p -> p.text(TextProperty.of(t -> t))))
-                            .properties("authorId", Property.of(p -> p.text(TextProperty.of(t -> t))))
-                            .properties("topicId", Property.of(p -> p.text(TextProperty.of(t -> t)))))
-                    .build();
+    private void createIndexIfNotExists(String indexName) {
+        boolean indexExists = false;
+        try {
+            indexExists = client.indices().exists(e -> e.index(indexName)).value();
+            if (!indexExists) {
+                // Nếu không tồn tại, tạo chỉ mục
+                CreateIndexRequest createIndexRequest = new CreateIndexRequest.Builder()
+                        .index(indexName)
+                        .build();
 
-            CreateIndexResponse createIndexResponse = client.indices().create(createIndexRequest);
-            System.out.println("Index created: " + createIndexResponse.index());
+                CreateIndexResponse createIndexResponse = client.indices().create(createIndexRequest);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+
     }
 
-    public void addPost() throws IOException {
+    public void addPost(PostResponse response) {
         createIndexIfNotExists("post");
-        List<Post> posts=postRepository.findAll();
-        List<PostES> postES=new ArrayList<>();
-        for (Post post1 : posts) {
-            PostES postES1=new PostES();
-            postES1.setId(post1.getId().toString());
-            postES1.setContent(post1.getContent());
-            postES1.setImage(post1.getImage());
-            postES1.setAuthorId(post1.getAuthor().getId().toString());
-            postES1.setTopicId(post1.getTopic().getId().toString());
-
-            postES.add(postES1);
+        IndexRequest<PostResponse> indexRequest= IndexRequest.of(i-> i
+                .index("posts")
+                .id(response.getPost().getId().toString())
+                .document(response)
+        );
+        try {
+            client.index(indexRequest);
+        }catch (IOException e){
+            throw new RuntimeException(e);
         }
 
 
-        for (PostES postES1 : postES) {
-            // Tạo IndexRequest từ đối tượng PostES
-            IndexRequest<PostES> indexRequest = IndexRequest.of(i -> i
-                    .index("posts")  // Chỉ mục "posts"
-                    .id(postES1.getId())  // Đặt ID cho document (nếu cần)
-                    .document(postES1)  // Đặt đối tượng PostES vào trong document
-            );
-            // Gửi yêu cầu index đến Elasticsearch
-            IndexResponse response = client.index(indexRequest);
-        }
 
 
     }

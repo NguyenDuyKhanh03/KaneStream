@@ -47,9 +47,5 @@ public class PostController {
 
     }
 
-    @PostMapping("/add-data-to-es")
-    public void addDataToEs() throws IOException {
-        postService.addPost();
-    }
 
 }
