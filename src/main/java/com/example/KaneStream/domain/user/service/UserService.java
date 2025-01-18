@@ -62,14 +62,7 @@ public class UserService {
 
     public UserDto getUser(){
         User user= getCurrentUser().orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
-        return UserDto.builder()
-                .id(user.getId())
-                .name(user.getLastName())
-                .username(user.getUsername())
-                .avatar(user.getAvatar())
-                .bio(user.getBio())
-                .posts(user.getPostsCount())
-                .followers(user.getFollowersCount())
-                .build();
+        return new UserDto(user.getId(),user.getLastName(),user.getAvatar(),user.getUsername(),user.getBio(),user.getPostsCount(),user.getFollowersCount(),0,"123" );
+
     }
 }

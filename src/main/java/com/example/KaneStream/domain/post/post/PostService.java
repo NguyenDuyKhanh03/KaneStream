@@ -1,7 +1,10 @@
 package com.example.KaneStream.domain.post.post;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch.core.IndexRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
 import com.example.KaneStream.domain.post.post_like.PostLike;
@@ -66,10 +69,10 @@ public class PostService {
         user.setPostsCount(user.getPostsCount()+1);
         userService.updateUser(user);
 
-        PostResponse postResponse=PostResponse.builder()
-                .user(UserDto.builder().id(user.getId()).avatar(user.getAvatar()).username(user.getUsername()).build())
-                .post(postMapper.mapFrom(postRepository.save(post)))
-                .build();
+        PostResponse postResponse=new PostResponse(
+                new UserDto(user.getId(),user.getLastName(),user.getAvatar(),user.getUsername(),user.getBio(),user.getPostsCount(),user.getFollowersCount(),0,"123" ),
+                postMapper.mapFrom(postRepository.save(post))
+        );
 
         addPost(postResponse);
 
@@ -130,7 +133,7 @@ public class PostService {
             User user=post.getAuthor();
             PostDto postDto=postMapper.mapFrom(post);
             return new PostResponse(
-                    UserDto.builder().id(user.getId()).avatar(user.getAvatar()).username(user.getUsername()).build(),
+                    new UserDto(user.getId(),user.getLastName(),user.getAvatar(),user.getUsername(),user.getBio(),user.getPostsCount(),user.getFollowersCount(),0,"123" ),
                     postDto
             );
 
@@ -217,9 +220,34 @@ public class PostService {
             throw new RuntimeException(e);
         }
 
+    }
 
+    public List<PostResponse> search(String keyword) {
+        // Use SearchResponse to search for posts by their content and sort like count.
+        try {
+            SearchResponse<PostResponse> searchResponse = client.search(s -> s
+                            .index("posts")
+                            .query(q -> q
+                                    .match(m -> m
+                                            .field("post.content")
+                                            .query(keyword)
+                                    )
+                            )
+                            .sort(sort -> sort //
+                                    .field(f -> f
+                                            .field("post.likedCount")
+                                            .order(SortOrder.Desc)
+                                    )
+                            ),
+                    PostResponse.class
+            );
 
-
+            return searchResponse.hits().hits().stream()
+                    .map(Hit::source)
+                    .toList();
+        }catch (IOException e){
+            throw new RuntimeException(e);
+        }
     }
 
 

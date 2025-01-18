@@ -48,4 +48,10 @@ public class PostController {
     }
 
 
+    @GetMapping("/find-post")
+    public ResponseEntity<List<PostResponse>> findPost(@RequestParam(name = "keyword") String keyword) {
+        return ResponseEntity.status(HttpStatus.OK).body(postService.search(keyword));
+    }
+
+
 }
